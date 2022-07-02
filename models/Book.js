@@ -29,11 +29,7 @@ const BookSchema = new Schema({
     type: String,
     enum: ["available", "unavailable"],
     default: "available"
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  }
+}, { timestamps: true });
 
 module.exports = Book = mongoose.model("book", BookSchema);
