@@ -1,14 +1,9 @@
+const Book = require("../models/Book");
 const BookService = require("../services/BookService");
+const Services = require("../services/ClientService")
 
 exports.createBook = async (req, res, next) => {
     try {
-        const {
-            title,
-            description,
-            author,
-            publishers,
-            category,
-        } = req.body;
         const book = await BookService.addBook(req.body);
         return res.status(201).send({
             status: true,
@@ -52,7 +47,36 @@ exports.fetchAllCategory = async (req, res, next) => {
 
 exports.fetchAllBooks = async (req, res, next) => {
     try {
-        const books = await BookService.getAllBooks();
+        const query = req.query;
+        var queryCond = {}
+        if (query.title) {
+            queryCond.title = { $regex: query.title, $options: "i" };
+        }
+        if (query.publishers) {
+            queryCond.publishers = { $regex: query.publishers, $options: "i" };
+        }
+        if (query.author) {
+            queryCond.author = { $regex: query.author, $options: "i" };
+        }
+        const books = await Book.find(queryCond).populate({
+            path: "category.name",
+            "match": { "name": { $regex: query.name, $options: "i" } }
+        })
+        // const books = await BookService.getAllBooks();
+        return res.status(200).send({
+            status: true,
+            message: "Books returned successfully",
+            data: books
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+}
+
+exports.fetchAllAvailableBooks = async (req, res, next) => {
+    try {
+        const books = await BookService.getAllBooksAvailable();
         return res.status(200).send({
             status: true,
             message: "Books returned successfully",
@@ -131,6 +155,34 @@ exports.updateBook = async (req, res, next) => {
             status: true,
             message: "Book updated successfully",
             data: book
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+}
+
+exports.getAllEnrolledUsers = async (req, res, next) => {
+    try {
+        const users = await Services.Client.getAllEnrolledUsers()
+        return res.status(200).send({
+            status: true,
+            message: "All users",
+            data: users
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+}
+
+exports.getAllUsersWithBooksBorrowed = async (req, res, next) => {
+    try {
+        const users = await Services.Client.getAllEnrolledUsers();
+        return res.status(200).send({
+            status: true,
+            message: "All users",
+            data: users
         });
 
     } catch (error) {

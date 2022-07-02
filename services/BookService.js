@@ -40,12 +40,17 @@ exports.addBook = async (bookdata) => {
 }
 
 exports.findBook = async id => {
-    const book = await Book.findById(id);
+    const book = await Book.findById(id).populate("category", "name");
     return book;
 }
 
 exports.getAllBooks = async () => {
-    const books = await Book.find().populate("category").sort({createdAt: "desc"});
+    const books = await Book.find().populate("category", "name").sort({ createdAt: "desc" });
+    return books;
+}
+
+exports.getAllBooksAvailable = async () => {
+    const books = await Book.find({ status: "available" }).populate("category", "name").sort({ createdAt: "desc" });
     return books;
 }
 
@@ -60,10 +65,12 @@ exports.deleteBook = async id => {
 
 exports.editBook = async (id, data) => {
     try {
-        const book = await Book.findOneAndUpdate({ id }, {$set: data}, {
-            new: true
-        }).exec();
-        return book
+        Book.findOneAndUpdate({ _id: id }, {$set:data}, { new: true }).then(book => {
+            book.save();
+            return book
+        }).catch(err => {
+            return err;
+        })
     } catch (error) {
         return error;
     }
