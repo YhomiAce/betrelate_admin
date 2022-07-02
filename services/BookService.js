@@ -15,8 +15,8 @@ exports.addCategory = async (name) => {
     }
 }
 
-exports.findCategory = async where => {
-    const category = await Category.findOne(where);
+exports.findCategory = async id => {
+    const category = await Category.findById(id);
     return category;
 }
 
@@ -39,13 +39,13 @@ exports.addBook = async (bookdata) => {
     return book;
 }
 
-exports.findBook = async where => {
-    const book = await Book.findOne(where);
+exports.findBook = async id => {
+    const book = await Book.findById(id);
     return book;
 }
 
 exports.getAllBooks = async () => {
-    const books = await Book.find();
+    const books = await Book.find().populate("category").sort({createdAt: "desc"});
     return books;
 }
 
@@ -58,13 +58,12 @@ exports.deleteBook = async id => {
     }
 }
 
-exports.updateBook = async (id, data) => {
+exports.editBook = async (id, data) => {
     try {
-        const filter = { id };
-        const category = await findOneAndUpdate(filter, data, {
-            new: true,
-            upsert: true
-        });
+        const book = await Book.findOneAndUpdate({ id }, {$set: data}, {
+            new: true
+        }).exec();
+        return book
     } catch (error) {
         return error;
     }
