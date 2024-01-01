@@ -1,5 +1,4 @@
 const Book = require("../models/Book");
-const { findOneAndUpdate } = require("../models/Category");
 const Category = require("../models/Category");
 
 exports.addCategory = async (name) => {
